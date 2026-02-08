@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Automation Tool</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🎓 Certificate Automation Tool</h1>
+                <p>Visual Position Editor & Batch Processing Dashboard</p>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="setup">📤 Setup</button>
+            <button class="tab-btn" data-tab="editor">🎨 Position Editor</button>
+            <button class="tab-btn" data-tab="preview">👁️ Preview</button>
+            <button class="tab-btn" data-tab="process">⚡ Process</button>
+            <button class="tab-btn" data-tab="history">📊 History</button>
+        </nav>
+
+        <!-- Tab Content -->
+        <main class="content">
+            <!-- Setup Tab -->
+            <div class="tab-content active" id="setup-tab">
+                <div class="grid-2">
+                    <!-- Upload Template -->
+                    <div class="card">
+                        <h2>📄 Certificate Template</h2>
+                        <div class="upload-zone" id="template-upload-zone">
+                            <input type="file" id="template-input" accept=".png" hidden>
+                            <div class="upload-placeholder">
+                                <div class="upload-icon">🖼️</div>
+                                <p>Drag & drop PNG template here</p>
+                                <p class="upload-hint">or click to browse</p>
+                            </div>
+                            <div class="upload-preview" id="template-preview" style="display: none;">
+                                <img id="template-img" alt="Template">
+                                <div class="upload-info">
+                                    <p id="template-filename"></p>
+                                    <p id="template-dimensions"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" id="upload-template-btn">Upload Template</button>
+                    </div>
+
+                    <!-- Upload CSV -->
+                    <div class="card">
+                        <h2>📊 Participant Data</h2>
+                        <div class="upload-zone" id="csv-upload-zone">
+                            <input type="file" id="csv-input" accept=".csv,.xlsx,.xls" hidden>
+                            <div class="upload-placeholder">
+                                <div class="upload-icon">📋</div>
+                                <p>Drag & drop CSV/Excel file here</p>
+                                <p class="upload-hint">or click to browse</p>
+                            </div>
+                            <div class="upload-preview" id="csv-preview" style="display: none;">
+                                <div class="upload-info">
+                                    <p id="csv-filename"></p>
+                                    <p id="csv-stats"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" id="upload-csv-btn">Upload CSV</button>
+
+                        <div id="csv-validation" style="display: none; margin-top: 1rem;">
+                            <div class="alert alert-success" id="valid-rows-alert"></div>
+                            <div class="alert alert-warning" id="invalid-rows-alert" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration -->
+                <div class="card" style="margin-top: 2rem;">
+                    <h2>⚙️ Configuration</h2>
+                    <!-- Temporarily disabled
+                        <div class="form-group">
+                            <label>Event Name</label>
+                            <input type="text" id="event-name" placeholder="Annual Tech Summit 2026">
+                        </div>
+                        -->
+                    <div class="form-group">
+                        <label>Certificate ID Prefix</label>
+                        <input type="text" id="cert-prefix" placeholder="CERT-TECH2026">
+                    </div>
+                    <div class="form-group">
+                        <label>Email From Name</label>
+                        <input type="text" id="email-from-name" placeholder="Tech Club">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Subject</label>
+                        <input type="text" id="email-subject" placeholder="Your Certificate of Participation">
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="save-config-btn">Save Configuration</button>
+            </div>
+    </div>
+
+    <!-- Position Editor Tab -->
+    <div class="tab-content" id="editor-tab">
+        <div class="editor-container">
+            <div class="editor-sidebar">
+                <h3>Text Elements</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Toggle elements on/off and customize their appearance
+                </p>
+
+                <!-- Name Position -->
+                <div class="control-group">
+                    <div class="control-header">
+                        <h4>👤 Participant Name</h4>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="name-enabled" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div id="name-controls" class="element-controls">
+                        <div class="control-row">
+                            <label>Font:</label>
+                            <select id="name-font" class="font-select">
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <label>X:</label>
+                            <input type="number" id="name-x" class="position-input">
+                        </div>
+                        <div class="control-row">
+                            <label>Y:</label>
+                            <input type="number" id="name-y" class="position-input">
+                        </div>
+                        <div class="control-row">
+                            <label>Size:</label>
+                            <input type="range" id="name-size" min="20" max="150" class="slider">
+                            <span id="name-size-value">80</span>
+                        </div>
+                        <div class="control-row">
+                            <label>Color:</label>
+                            <input type="color" id="name-color" class="color-picker">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Position -->
+                <!-- Temporarily disabled
+                <div class="control-group">
+                    <div class="control-header">
+                        <h4>🎯 Event Name</h4>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="event-enabled" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div id="event-controls" class="element-controls">
+                        <div class="control-row">
+                            <label>Font:</label>
+                            <select id="event-font" class="font-select">
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <label>X:</label>
+                            <input type="number" id="event-x" class="position-input">
+                        </div>
+                        <div class="control-row">
+                            <label>Y:</label>
+                            <input type="number" id="event-y" class="position-input">
+                        </div>
+                        <div class="control-row">
+                            <label>Size:</label>
+                            <input type="range" id="event-size" min="20" max="100" class="slider">
+                            <span id="event-size-value">50</span>
+                        </div>
+                        <div class="control-row">
+                            <label>Color:</label>
+                            <input type="color" id="event-color" class="color-picker">
+                        </div>
+                    </div>
+                </div>
+                -->
+
+                <!-- Certificate ID Position -->
+                <div class="control-group">
+                    <div class="control-header">
+                        <h4>🔖 Certificate ID</h4>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="certid-enabled" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div id="certid-controls" class="element-controls">
+                        <div class="control-row">
+                            <label>Font:</label>
+                            <select id="certid-font" class="font-select">
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <label>X:</label>
+                            <input type="number" id="certid-x" class="position-input">
+                        </div>
+                        <div class="control-row">
+                            <label>Y:</label>
+                            <input type="number" id="certid-y" class="position-input">
+                        </div>
+                        <div class="control-row">
+                            <label>Size:</label>
+                            <input type="range" id="certid-size" min="15" max="60" class="slider">
+                            <span id="certid-size-value">30</span>
+                        </div>
+                        <div class="control-row">
+                            <label>Color:</label>
+                            <input type="color" id="certid-color" class="color-picker">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QR Code Position -->
+                <div class="control-group">
+                    <div class="control-header">
+                        <h4>📱 QR Code</h4>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="qr-enabled">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div id="qr-controls" class="element-controls" style="display: none;">
+                        <div class="control-row">
+                            <label>X:</label>
+                            <input type="number" id="qr-x" class="position-input">
+                        </div>
+                        <div class="control-row">
+                            <label>Y:</label>
+                            <input type="number" id="qr-y" class="position-input">
+                        </div>
+                        <div class="control-row">
+                            <label>Size:</label>
+                            <input type="range" id="qr-size" min="100" max="400" class="slider">
+                            <span id="qr-size-value">200</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-secondary" id="center-elements-btn" style="flex: 1;">Auto
+                        Center</button>
+                    <button class="btn btn-primary" id="save-positions-btn" style="flex: 1;">Save
+                        Positions</button>
+                </div>
+            </div>
+
+            <div class="editor-canvas-container">
+                <div class="canvas-wrapper">
+                    <canvas id="editor-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Tab -->
+    <div class="tab-content" id="preview-tab">
+        <div class="card">
+            <h2>👁️ Certificate Preview</h2>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Test Name</label>
+                    <input type="text" id="preview-name" placeholder="John Smith" value="John Smith">
+                </div>
+                <!-- Temporarily disabled
+                        <div class="form-group">
+                            <label>Test Event</label>
+                            <input type="text" id="preview-event" placeholder="Annual Tech Summit 2026"
+                                value="Annual Tech Summit 2026">
+                        </div>
+                        -->
+            </div>
+            <button class="btn btn-primary" id="generate-preview-btn">Generate Preview</button>
+
+            <div id="preview-result" style="display: none; margin-top: 2rem;">
+                <div class="preview-container">
+                    <iframe id="preview-iframe" style="width: 100%; height: 600px; border: 1px solid #333;"></iframe>
+                </div>
+                <button class="btn btn-secondary" id="download-preview-btn" style="margin-top: 1rem;">Download
+                    Preview PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Tab -->
+    <div class="tab-content" id="process-tab">
+        <div class="card">
+            <h2>⚡ Batch Processing</h2>
+            <div class="processing-status" id="processing-status">
+                <div class="status-header">
+                    <h3>Ready to Process</h3>
+                    <div class="status-badge" id="status-badge">Idle</div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">0 / 0</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-total">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-value" id="stat-success">0</div>
+                        <div class="stat-label">Success</div>
+                    </div>
+                    <div class="stat-card error">
+                        <div class="stat-value" id="stat-failed">0</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                </div>
+
+                <div class="processing-controls">
+                    <button class="btn btn-primary" id="start-processing-btn">Start Processing</button>
+                    <button class="btn btn-secondary" id="pause-processing-btn" style="display: none;">Pause</button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h3>📋 Live Logs</h3>
+                <div class="log-container" id="log-container">
+                    <p class="log-empty">No logs yet. Start processing to see live updates.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Tab -->
+    <div class="tab-content" id="history-tab">
+        <div class="card">
+            <h2>📊 Delivery History</h2>
+            <button class="btn btn-secondary" id="refresh-history-btn">Refresh</button>
+
+            <div class="table-container" style="margin-top: 1rem;">
+                <table id="history-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Certificate ID</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem;">
+                                No delivery history yet
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/app.js"></script>
+    <script src="/js/positionEditor.js"></script>
+    <script src="/js/preview.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+
+</html>
