@@ -6,14 +6,27 @@ document.getElementById('start-processing-btn').addEventListener('click', startP
 document.getElementById('refresh-history-btn').addEventListener('click', loadHistory);
 
 async function startProcessing() {
-    // This would trigger the backend processing
-    // For now, we'll show a message
-    alert('Processing functionality will be integrated with the backend CLI process. Use the CLI commands for now:\n\nnpm start - Production\nnpm run test - Test mode\nnpm run dry-run - Dry run');
+    try {
+        const response = await fetch('/api/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ mode: 'production' }) // Can be 'dry-run' or 'test' based on UI selection
+        });
 
-    // In a full implementation, this would:
-    // 1. Start the processing via API
-    // 2. Connect to SSE for real-time updates
-    // 3. Update the dashboard with progress
+        const data = await response.json();
+
+        if (data.success) {
+            connectToSSE();
+            document.getElementById('start-processing-btn').disabled = true;
+            document.getElementById('start-processing-btn').textContent = 'Processing...';
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        alert('Failed to start processing: ' + error.message);
+    }
 }
 
 function connectToSSE() {
@@ -53,6 +66,13 @@ function updateDashboard(status) {
     } else if (status.progress === status.total && status.total > 0) {
         badge.textContent = 'Complete';
         badge.className = 'status-badge complete';
+
+        // Re-enable button
+        document.getElementById('start-processing-btn').disabled = false;
+        document.getElementById('start-processing-btn').textContent = 'Start Processing';
+
+        // Refresh history
+        loadHistory();
     } else {
         badge.textContent = 'Idle';
         badge.className = 'status-badge idle';

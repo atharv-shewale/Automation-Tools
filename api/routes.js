@@ -6,6 +6,7 @@ const path = require('path');
 const ExcelService = require('../services/excelService');
 const ValidatorService = require('../services/validatorService');
 const CertificateService = require('../services/certificateService');
+const AutomationService = require('../services/automationService');
 const Logger = require('../utils/logger');
 
 // In-memory storage for processing status
@@ -290,6 +291,76 @@ router.post('/preview', async (req, res) => {
             pdfPath: pdfPath,
             downloadUrl: `/preview/${path.basename(pdfPath)}`
         });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/process - Start certificate processing
+ */
+router.post('/process', async (req, res) => {
+    try {
+        if (processingStatus.isProcessing) {
+            return res.status(409).json({ error: 'Processing is already in progress' });
+        }
+
+        // Reset status
+        processingStatus = {
+            isProcessing: true,
+            progress: 0,
+            total: 0,
+            success: 0,
+            failed: 0,
+            currentParticipant: 'Initializing...',
+            logs: []
+        };
+        broadcastStatus(processingStatus);
+
+        // Create a custom logger that captures logs for the UI
+        class WebLogger extends Logger {
+            log(level, message, ...args) {
+                super.log(level, message, ...args);
+
+                // Add to memory logs
+                const timestamp = new Date().toISOString();
+                const logEntry = { type: level, message, timestamp };
+                processingStatus.logs.push(logEntry);
+
+                // Keep log size manageable
+                if (processingStatus.logs.length > 500) {
+                    processingStatus.logs.shift();
+                }
+
+                // Broadcast update
+                broadcastStatus(processingStatus);
+            }
+        }
+
+        const webLogger = new WebLogger('./logs');
+        const automationService = new AutomationService(webLogger);
+
+        // Run asynchronously
+        automationService.run({
+            mode: req.body.mode || process.env.MODE || 'production',
+            onProgress: (status) => {
+                processingStatus = { ...processingStatus, ...status };
+                broadcastStatus(processingStatus);
+            }
+        }).then(results => {
+            processingStatus.isProcessing = false;
+            processingStatus.currentParticipant = 'Completed';
+            broadcastStatus(processingStatus);
+        }).catch(error => {
+            processingStatus.isProcessing = false;
+            processingStatus.currentParticipant = 'Error: ' + error.message;
+            const logEntry = { type: 'error', message: error.message, timestamp: new Date().toISOString() };
+            processingStatus.logs.push(logEntry);
+            broadcastStatus(processingStatus);
+        });
+
+        res.json({ success: true, message: 'Processing started' });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

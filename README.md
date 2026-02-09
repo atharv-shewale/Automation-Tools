@@ -25,7 +25,7 @@ A Node.js-based system that automates certificate generation and email distribut
 
 1. **Clone or navigate to the project directory:**
    ```bash
-   cd cert-automation
+   cd certificate-automation
    ```
 
 2. **Install dependencies:**
@@ -106,7 +106,7 @@ npm run test
 ## 📁 Project Structure
 
 ```
-cert-automation/
+certificate-automation/
 ├── data/
 │   └── participants.xlsx          # Input Excel file
 ├── templates/

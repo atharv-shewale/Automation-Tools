@@ -1,5 +1,5 @@
 {
-    "name": "cert-automation",
+    "name": "certificate-automation",
     "version": "1.0.0",
     "description": "Club Certificate Automation Tool - Generate and email certificates automatically",
     "main": "server.js",
